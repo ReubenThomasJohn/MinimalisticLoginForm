@@ -5,6 +5,7 @@ A simple, minimalist login + registration form built using Node.js, Express, Mon
 TODO:
 
 - [x] Add CSS styling and JS to indicate the re-typed password does not match the password in the registration form.
+- [x] Fix login, logout and register routes
 - [x] Add bcrypt encryption
 - [x] Add cookies and sessions to autheticate users using passport.js
 - [ ] Add the toast when email ID is already in the system
