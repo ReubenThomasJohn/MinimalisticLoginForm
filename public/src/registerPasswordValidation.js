@@ -11,3 +11,11 @@ function validatePassword() {
   else password2.style.color = 'red';
   //   document.getElementById('submitButton').disabled = false;
 }
+
+function checkEmail() {
+  email = document.getElementById('email').value;
+  fetch('/checkEmail', {
+    method: 'POST',
+    body: new URLSearchParams({ email }),
+  }).then((response) => console.log(response.json()));
+}
