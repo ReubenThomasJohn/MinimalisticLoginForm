@@ -106,9 +106,9 @@ app.post('/checkEmail', function (req, res) {
   console.log(req.body.email);
   User.findOne({ email: req.body.email }, function (err, foundUser) {
     if (foundUser) {
-      res.send({ validity: 'Email already exists' });
+      res.send({ validity: true });
     } else {
-      res.send({ validity: 'New Email' });
+      res.send({ validity: false });
     }
   });
 });
