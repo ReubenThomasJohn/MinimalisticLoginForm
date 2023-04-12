@@ -48,8 +48,16 @@ const User = new mongoose.model('User', userSchema);
 
 passport.use(User.createStrategy());
 
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+// passport.serializeUser(User.serializeUser());
+// passport.deserializeUser(User.deserializeUser());
+
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function (user, done) {
+  done(null, user);
+});
 
 passport.use(
   new GoogleStrategy(
@@ -80,15 +88,16 @@ app.get('/register', function (req, res) {
   res.render('register');
 });
 
-app.get('/auth/google', function (req, res) {
-  console.log('hitting');
-  passport.authenticate('google', { scope: ['profile'] });
-});
+app.get(
+  '/auth/google',
+  passport.authenticate('google', { scope: ['profile'] })
+);
 
 app.get(
   '/auth/google/secrets',
   passport.authenticate('google', { failureRedirect: '/login' }),
   function (req, res) {
+    // Successful authentication, redirect to secrets
     res.redirect('/secrets');
   }
 );
@@ -122,6 +131,7 @@ app.post('/register', function (req, res) {
         res.redirect('/register');
       } else {
         passport.authenticate('local')(req, res, function () {
+          console.log('Local Strategy');
           res.redirect('/secrets');
         });
       }
