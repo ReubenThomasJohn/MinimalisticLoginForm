@@ -5,10 +5,11 @@ async function checkEmail() {
     body: new URLSearchParams({ email }),
   });
   const jsonData = await response.json();
-  if (jsonData.validity) {
-  }
+  console.log(jsonData.validity);
+  //   if (jsonData.validity) {
+  //   }
+  // }
 }
-
 /*
 <div class="toast" role="alert" aria-live="assertive" aria-atomic="true">
   <div class="toast-header">
@@ -24,5 +25,3 @@ async function checkEmail() {
   </div>
 </div>
 */
-
-//window.innerHTML = ...

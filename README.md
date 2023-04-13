@@ -12,3 +12,9 @@ TODO:
 - [ ] Upon pressing register button, email needs to be sent with a 'confirm email' prompt: Done to validate mail ID input.
 - [x] Add Google OAuth2
 - [ ] Try adding style like: https://www.frontendmentor.io/challenges/multistep-form-YVAnSdqQBJ
+
+## To run:
+
+1. docker build . -t <username>/node-web-app
+2. docker run -d -p 3001:3001 -d <username>/node-web-app
+3. open up localhost:3001 to view the app
