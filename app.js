@@ -27,6 +27,8 @@ app.use(
   })
 );
 
+const PORT = process.env.PORT;
+
 app.use(passport.initialize());
 app.use(passport.session());
 
@@ -64,7 +66,7 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: 'http://localhost:3001/auth/google/secrets',
+      callbackURL: `http://localhost:${PORT}/auth/google/secrets`,
       userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo',
     },
     function (accessToken, refreshToken, profile, cb) {
@@ -123,7 +125,7 @@ app.get('/secrets', function (req, res) {
 
 app.post('/register', function (req, res) {
   User.register(
-    { username: req.body.username },
+    { username: req.body.email },
     req.body.password,
     function (err, user) {
       if (err) {
@@ -165,6 +167,6 @@ app.get('/logout', function (req, res, next) {
   });
 });
 
-app.listen(3001, function () {
-  console.log('Server running on port 3001');
+app.listen(PORT, function () {
+  console.log(`Server running on port ${PORT}`);
 });

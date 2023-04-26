@@ -9,13 +9,33 @@
           <!-- Makes POST request to /register route -->
           <form action="/register" method="POST">
             <div class="form-group">
+              <label for="name">Name</label>
+              <input
+                id="name"
+                type="name"
+                class="form-control"
+                name="name"
+                onchange="validatePassword()"
+              />
+            </div>
+            <div class="form-group">
               <label for="email">Email</label>
               <input
                 id="email"
                 type="email"
                 class="form-control"
-                name="username"
+                name="email"
                 onchange="checkEmail()"
+              />
+            </div>
+            <div class="form-group">
+              <label for="email">Date Of Birth</label>
+              <input
+                id="dob"
+                type="dob"
+                class="form-control"
+                name="dob"
+                onchange="validatePassword()"
               />
             </div>
             <div class="form-group">
