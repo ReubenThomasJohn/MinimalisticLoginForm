@@ -1,4 +1,7 @@
 //jshint esversion:6
+
+require('./config/db');
+
 dotenv = require('dotenv').config();
 const bodyParser = require('body-parser');
 const express = require('express');
@@ -125,13 +128,14 @@ app.get('/secrets', function (req, res) {
 
 app.post('/register', function (req, res) {
   User.register(
-    { username: req.body.email },
+    { username: req.body.username },
     req.body.password,
     function (err, user) {
       if (err) {
         console.log(err);
         res.redirect('/register');
       } else {
+        console.log(user);
         passport.authenticate('local')(req, res, function () {
           console.log('Local Strategy');
           res.redirect('/secrets');
