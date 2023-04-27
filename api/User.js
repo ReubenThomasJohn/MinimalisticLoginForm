@@ -1,31 +1,14 @@
-const bodyParser = require('body-parser');
-
 const express = require('express');
 const router = express.Router();
 
-router.use(express.static('public'));
-router.use(bodyParser.urlencoded({ extended: true }));
-
-const PORT = process.env.PORT;
-
-app.use(passport.initialize());
-app.use(passport.session());
-
 // mongodb user model
-const { UserSchema } = require('./../models/User');
+const { UserSchema, User } = require('./../models/User');
 
 // mongodb user verification model
 const {
   UserVerificationSchema,
   UserVerification,
 } = require('./../models/UserVerification');
-
-UserSchema.plugin(passportLocalMongoose);
-UserSchema.plugin(findOrCreate);
-
-const User = new mongoose.model('User', userSchema);
-
-passport.use(User.createStrategy());
 
 // email handler
 const nodemailer = require('nodemailer');
@@ -41,43 +24,6 @@ const bcrypt = require('bcrypt');
 
 // path for static verified page
 const path = require('path');
-
-// load env variables
-require('dotenv').config();
-
-const { default: mongoose } = require('mongoose');
-
-const saltRounds = 8;
-const session = require('express-session');
-const passport = require('passport');
-const passportLocalMongoose = require('passport-local-mongoose');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const findOrCreate = require('mongoose-findorcreate');
-
-passport.serializeUser(function (user, done) {
-  done(null, user);
-});
-
-passport.deserializeUser(function (user, done) {
-  done(null, user);
-});
-
-passport.use(
-  new GoogleStrategy(
-    {
-      clientID: process.env.CLIENT_ID,
-      clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: `http://localhost:${PORT}/auth/google/secrets`,
-      userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo',
-    },
-    function (accessToken, refreshToken, profile, cb) {
-      console.log(profile);
-      User.findOrCreate({ googleId: profile.id }, function (err, user) {
-        return cb(err, user);
-      });
-    }
-  )
-);
 
 // nodemailer stuff
 let transporter = nodemailer.createTransport({
@@ -164,96 +110,6 @@ const sendVerificationEmail = ({ _id, email }, res) => {
       });
     });
 };
-
-app.get('/', function (req, res) {
-  res.render('home');
-});
-
-app.get('/login', function (req, res) {
-  res.render('login');
-});
-
-app.get('/register', function (req, res) {
-  res.render('register');
-});
-
-app.get(
-  '/auth/google',
-  passport.authenticate('google', { scope: ['profile'] })
-);
-
-app.get(
-  '/auth/google/secrets',
-  passport.authenticate('google', { failureRedirect: '/login' }),
-  function (req, res) {
-    // Successful authentication, redirect to secrets
-    res.redirect('/secrets');
-  }
-);
-
-app.post('/checkEmail', function (req, res) {
-  console.log(req.body.email);
-  User.findOne({ email: req.body.email }, function (err, foundUser) {
-    if (foundUser) {
-      res.send({ validity: true });
-    } else {
-      res.send({ validity: false });
-    }
-  });
-});
-
-app.get('/secrets', function (req, res) {
-  if (req.isAuthenticated()) {
-    res.render('secrets');
-  } else {
-    res.redirect('/login');
-  }
-});
-
-app.post('/register', function (req, res) {
-  User.register(
-    { username: req.body.username },
-    req.body.password,
-    function (err, user) {
-      if (err) {
-        console.log(err);
-        res.redirect('/register');
-      } else {
-        console.log(user);
-        passport.authenticate('local')(req, res, function () {
-          console.log('Local Strategy');
-          res.redirect('/secrets');
-        });
-      }
-    }
-  );
-});
-
-app.post('/login', function (req, res) {
-  const user = new User({
-    username: req.body.username,
-    password: req.body.password,
-  });
-
-  req.login(user, function (err) {
-    if (err) {
-      console.log(err);
-    } else {
-      passport.authenticate('local')(req, res, function () {
-        res.redirect('/secrets');
-      });
-    }
-  });
-});
-
-app.get('/logout', function (req, res, next) {
-  req.logout(function (err) {
-    if (err) {
-      return next(err);
-    }
-    res.redirect('/');
-  });
-});
 
 //verify email
 router.get('/verify/:userId/:uniqueString', (req, res) => {
