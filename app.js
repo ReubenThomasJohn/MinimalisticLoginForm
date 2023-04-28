@@ -18,9 +18,18 @@ const findOrCreate = require('mongoose-findorcreate');
 
 const app = express();
 
+//cors
+const cors = require('cors');
+app.use(cors());
+
+const UserRouter = require('./api/User');
+
+app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use('/', UserRouter);
+
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
-app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(
   session({
@@ -37,12 +46,14 @@ app.use(passport.session());
 
 mongoose.set('strictQuery', false);
 
-mongoose.connect('mongodb://localhost:27017/userDB', { useNewUrlParser: true });
+// mongoose.connect('mongodb://localhost:27017/userDB', { useNewUrlParser: true });
 
-const userSchema = new mongoose.Schema({
-  email: String,
-  password: String,
-});
+// const userSchema = new mongoose.Schema({
+//   email: String,
+//   password: String,
+// });
+// mongodb user model
+const { userSchema } = require('./models/User');
 
 userSchema.plugin(passportLocalMongoose);
 userSchema.plugin(findOrCreate);
@@ -69,7 +80,7 @@ passport.use(
     {
       clientID: process.env.CLIENT_ID,
       clientSecret: process.env.CLIENT_SECRET,
-      callbackURL: `http://localhost:${PORT}/auth/google/secrets`,
+      callbackURL: `http://localhost:5000/auth/google/secrets`,
       userProfileURL: 'https://www.googleapis.com/oauth2/v3/userinfo',
     },
     function (accessToken, refreshToken, profile, cb) {
@@ -126,41 +137,41 @@ app.get('/secrets', function (req, res) {
   }
 });
 
-app.post('/register', function (req, res) {
-  User.register(
-    { username: req.body.username },
-    req.body.password,
-    function (err, user) {
-      if (err) {
-        console.log(err);
-        res.redirect('/register');
-      } else {
-        console.log(user);
-        passport.authenticate('local')(req, res, function () {
-          console.log('Local Strategy');
-          res.redirect('/secrets');
-        });
-      }
-    }
-  );
-});
+// app.post('/register', function (req, res) {
+//   User.register(
+//     { username: req.body.username },
+//     req.body.password,
+//     function (err, user) {
+//       if (err) {
+//         console.log(err);
+//         res.redirect('/register');
+//       } else {
+//         console.log(user);
+//         passport.authenticate('local')(req, res, function () {
+//           console.log('Local Strategy');
+//           res.redirect('/secrets');
+//         });
+//       }
+//     }
+//   );
+// });
 
-app.post('/login', function (req, res) {
-  const user = new User({
-    username: req.body.username,
-    password: req.body.password,
-  });
+// app.post('/login', function (req, res) {
+//   const user = new User({
+//     username: req.body.username,
+//     password: req.body.password,
+//   });
 
-  req.login(user, function (err) {
-    if (err) {
-      console.log(err);
-    } else {
-      passport.authenticate('local')(req, res, function () {
-        res.redirect('/secrets');
-      });
-    }
-  });
-});
+//   req.login(user, function (err) {
+//     if (err) {
+//       console.log(err);
+//     } else {
+//       passport.authenticate('local')(req, res, function () {
+//         res.redirect('/secrets');
+//       });
+//     }
+//   });
+// });
 
 app.get('/logout', function (req, res, next) {
   req.logout(function (err) {

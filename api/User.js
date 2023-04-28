@@ -298,11 +298,12 @@ router.post('/login', (req, res) => {
 
 // signup
 router.post('/register', (req, res) => {
-  let { name, email, password, dateOfBirth } = req.body;
+  console.log(req.body);
+  let { name, username, password, dob } = req.body;
   name = name.trim();
-  email = email.trim();
+  email = username.trim();
   password = password.trim();
-  dateOfBirth = dateOfBirth.trim();
+  dateOfBirth = dob.trim();
 
   if (name == '' || email == '' || password == '' || dateOfBirth == '') {
     res.json({
