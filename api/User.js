@@ -105,7 +105,7 @@ const sendVerificationEmail = ({ _id, email }, res) => {
     html: `<p> Verify your email address to complete the signup and login to your account</p>
              <p>This link <b>expires in 6 hours</b>.</p>
              <p>Press <a href=${
-               currentUrl + 'user/verify/' + _id + '/' + uniqueString
+               currentUrl + 'verify/' + _id + '/' + uniqueString
              }>here</a> to proceed.</p>`,
   };
 
@@ -314,8 +314,8 @@ router.get('/verified', (req, res) => {
 
 // signin
 router.post('/login', (req, res) => {
-  let { email, password } = req.body;
-  email = email.trim();
+  let { username, password } = req.body;
+  email = username.trim();
   password = password.trim();
 
   const user = new User({
@@ -349,11 +349,11 @@ router.post('/login', (req, res) => {
               .then((result) => {
                 if (result) {
                   //password match
-                  res.json({
-                    status: 'SUCCESS',
-                    message: 'Signin successfull',
-                    data: data,
-                  });
+                  // res.json({
+                  //   status: 'SUCCESS',
+                  //   message: 'Signin successfull',
+                  //   data: data,
+                  // });
                   req.login(user, function (err) {
                     if (err) {
                       console.log(err);
