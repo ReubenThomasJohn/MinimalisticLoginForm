@@ -16,12 +16,6 @@ const passportLocalMongoose = require('passport-local-mongoose');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 const findOrCreate = require('mongoose-findorcreate');
 
-const app = express();
-
-//cors
-const cors = require('cors');
-app.use(cors());
-
 const UserRouter = require('./api/User');
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -31,49 +25,10 @@ app.use('/', UserRouter);
 app.use(express.static('public'));
 app.set('view engine', 'ejs');
 
-app.use(
-  session({
-    secret: 'Our little secret.',
-    resave: false,
-    saveUninitialized: false,
-  })
-);
-
-const PORT = process.env.PORT;
-
 app.use(passport.initialize());
 app.use(passport.session());
 
-mongoose.set('strictQuery', false);
-
-// mongoose.connect('mongodb://localhost:27017/userDB', { useNewUrlParser: true });
-
-// const userSchema = new mongoose.Schema({
-//   email: String,
-//   password: String,
-// });
-// mongodb user model
-const { userSchema } = require('./models/User');
-
-userSchema.plugin(passportLocalMongoose);
-userSchema.plugin(findOrCreate);
-
-// const secret = process.env.SECRET;
-
-const User = new mongoose.model('User', userSchema);
-
-passport.use(User.createStrategy());
-
-// passport.serializeUser(User.serializeUser());
-// passport.deserializeUser(User.deserializeUser());
-
-passport.serializeUser(function (user, done) {
-  done(null, user);
-});
-
-passport.deserializeUser(function (user, done) {
-  done(null, user);
-});
+const PORT = process.env.PORT;
 
 passport.use(
   new GoogleStrategy(

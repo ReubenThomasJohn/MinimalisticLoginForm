@@ -9,6 +9,6 @@ const userSchema = new mongoose.Schema({
   verified: Boolean,
 });
 
-// const User = new mongoose.model('User', userSchema);
+const User = new mongoose.model('User', userSchema);
 
-module.exports = { userSchema };
+module.exports = { userSchema, User };

@@ -25,6 +25,37 @@ const bcrypt = require('bcrypt');
 // path for static verified page
 const path = require('path');
 
+app.use(passport.initialize());
+app.use(passport.session());
+
+mongoose.set('strictQuery', false);
+
+// mongoose.connect('mongodb://localhost:27017/userDB', { useNewUrlParser: true });
+
+// const userSchema = new mongoose.Schema({
+//   email: String,
+//   password: String,
+// });
+// mongodb user model
+const { userSchema } = require('./models/User');
+
+userSchema.plugin(passportLocalMongoose);
+userSchema.plugin(findOrCreate);
+
+// const secret = process.env.SECRET;
+
+const User = new mongoose.model('User', userSchema);
+
+passport.use(User.createStrategy());
+
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function (user, done) {
+  done(null, user);
+});
+
 // nodemailer stuff
 let transporter = nodemailer.createTransport({
   service: 'outlook',
