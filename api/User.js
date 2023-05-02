@@ -346,11 +346,6 @@ router.post('/login', (req, res) => {
   email = username.trim();
   password = password.trim();
 
-  const user = new User({
-    email: email,
-    password: password,
-  });
-
   if (email == '' || password == '') {
     res.json({
       status: 'FAILED',
@@ -360,6 +355,7 @@ router.post('/login', (req, res) => {
     // Check if user exists
     User.find({ email })
       .then((data) => {
+        // console.log(data);
         if (data.length) {
           // user exists
 
@@ -372,6 +368,8 @@ router.post('/login', (req, res) => {
             });
           } else {
             const hashedPassword = data[0].password;
+            console.log(typeof password);
+            console.log(typeof hashedPassword);
             bcrypt
               .compare(password, hashedPassword)
               .then((result) => {
@@ -412,6 +410,7 @@ router.post('/login', (req, res) => {
                   status: 'FAILED',
                   message: 'An error occurred while comparing passwords',
                   data: data,
+                  error: err,
                 });
               });
           }
