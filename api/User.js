@@ -387,9 +387,16 @@ router.post('/login', (req, res) => {
                       console.log(err);
                     } else {
                       console.log('Trying to authenticate');
-                      passport.authenticate('local')(req, res, function () {
-                        res.redirect('/secrets');
-                      });
+                      // passport.authenticate('local')(req, res, function () {
+                      //   res.redirect('/secrets');
+                      // });
+                      passport.authenticate('local', {
+                        failureRedirect: '/login',
+                        failureMessage: true,
+                      }),
+                        function (req, res) {
+                          res.redirect('/secrets');
+                        };
                     }
                   });
                 } else {
