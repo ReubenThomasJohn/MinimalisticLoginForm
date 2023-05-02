@@ -47,14 +47,6 @@ const User = new mongoose.model('User', userSchema);
 
 passport.use(User.createStrategy());
 
-passport.serializeUser(function (user, done) {
-  done(null, user);
-});
-
-passport.deserializeUser(function (user, done) {
-  done(null, user);
-});
-
 passport.use(
   new GoogleStrategy(
     {
@@ -65,15 +57,44 @@ passport.use(
     },
     function (accessToken, refreshToken, profile, cb) {
       console.log(profile);
-      User.findOrCreate(
-        { username: profile.emails[0].value, googleId: profile.id },
+      User.findOne(
+        {
+          email: profile.emails[0].value,
+        },
         function (err, user) {
-          return cb(err, user);
+          if (err) {
+            return cb(err);
+          }
+          // No user was found... so create a new user with values from Google
+          if (!user) {
+            user = new User({
+              username: profile.displayName,
+              email: profile.emails[0].value,
+              password: profile.id,
+              dateOfBirth: null,
+              verified: true,
+            });
+            user.save(function (err) {
+              if (err) console.log(err);
+              return cb(err, user);
+            });
+          } else {
+            // found user. Return
+            return cb(err, user);
+          }
         }
       );
     }
   )
 );
+
+passport.serializeUser(function (user, done) {
+  done(null, user);
+});
+
+passport.deserializeUser(function (user, done) {
+  done(null, user);
+});
 
 // nodemailer stuff
 let transporter = nodemailer.createTransport({
@@ -180,7 +201,10 @@ router.get(
 
 router.get(
   '/auth/google/secrets',
-  passport.authenticate('google', { failureRedirect: '/login' }),
+  passport.authenticate('google', {
+    scope: ['profile', 'email'],
+    failureRedirect: '/login',
+  }),
   function (req, res) {
     // Successful authentication, redirect to secrets
     res.redirect('/secrets');
@@ -211,6 +235,7 @@ router.get('/logout', function (req, res, next) {
     if (err) {
       return next(err);
     }
+    req.session.destroy();
     res.redirect('/');
   });
 });
@@ -361,6 +386,7 @@ router.post('/login', (req, res) => {
                     if (err) {
                       console.log(err);
                     } else {
+                      console.log('Trying to authenticate');
                       passport.authenticate('local')(req, res, function () {
                         res.redirect('/secrets');
                       });
@@ -452,10 +478,10 @@ router.post('/register', (req, res) => {
           .hash(password, saltRounds)
           .then((hashedPassword) => {
             const newUser = new User({
-              name,
-              email,
+              name: name,
+              email: email,
               password: hashedPassword,
-              dateOfBirth,
+              dateOfBirth: dateOfBirth,
               verified: false,
             });
 
