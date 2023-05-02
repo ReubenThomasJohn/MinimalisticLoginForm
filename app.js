@@ -101,14 +101,29 @@ passport.use(
     },
     function (accessToken, refreshToken, profile, cb) {
       console.log(profile);
-      User.findOrCreate(
+      User.findOne(
         {
-          username: profile.displayName,
           email: profile.emails[0].value,
-          password: profile.id,
         },
         function (err, user) {
-          return cb(err, user);
+          if (err) {
+            return cb(err);
+          }
+          // No user was found... so create a new user with values from Google
+          if (!user) {
+            user = new User({
+              username: profile.displayName,
+              email: profile.emails[0].value,
+              password: profile.id,
+            });
+            user.save(function (err) {
+              if (err) console.log(err);
+              return cb(err, user);
+            });
+          } else {
+            // found user. Return
+            return cb(err, user);
+          }
         }
       );
     }
