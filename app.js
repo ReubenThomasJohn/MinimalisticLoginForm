@@ -35,7 +35,11 @@ mongoose.set('strictQuery', false);
 mongoose.connect('mongodb://localhost:27017/userDB', { useNewUrlParser: true });
 
 const userSchema = new mongoose.Schema({
-  email: String,
+  email: {
+    type: String,
+    index: true,
+    unique: true,
+  },
   password: String,
 });
 
@@ -70,7 +74,7 @@ passport.use(
     function (accessToken, refreshToken, profile, cb) {
       console.log(profile);
       User.findOrCreate(
-        { username: profile.displayName, googleId: profile.id },
+        { email: profile.displayName, password: profile.id },
         function (err, user) {
           return cb(err, user);
         }
@@ -98,7 +102,10 @@ app.get(
 
 app.get(
   '/auth/google/secrets',
-  passport.authenticate('google', { failureRedirect: '/login' }),
+  passport.authenticate('google', {
+    scope: ['profile'], // added this
+    failureRedirect: '/login',
+  }),
   function (req, res) {
     // Successful authentication, redirect to secrets
     res.redirect('/secrets');
