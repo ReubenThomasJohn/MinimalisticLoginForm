@@ -39,7 +39,7 @@ const findOrCreate = require('mongoose-findorcreate');
 // });
 
 userSchema.plugin(passportLocalMongoose);
-userSchema.plugin(findOrCreate);
+// userSchema.plugin(findOrCreate);
 
 // const secret = process.env.SECRET;
 
@@ -355,7 +355,7 @@ router.post('/login', (req, res) => {
     // Check if user exists
     User.find({ email })
       .then((data) => {
-        // console.log(data);
+        console.log(data);
         if (data.length) {
           // user exists
 
@@ -368,35 +368,29 @@ router.post('/login', (req, res) => {
             });
           } else {
             const hashedPassword = data[0].password;
-            console.log(typeof password);
-            console.log(typeof hashedPassword);
             bcrypt
               .compare(password, hashedPassword)
               .then((result) => {
                 if (result) {
+                  console.log('Password matches!');
                   //password match
                   // res.json({
                   //   status: 'SUCCESS',
                   //   message: 'Signin successfull',
                   //   data: data,
                   // });
-                  req.login(user, function (err) {
-                    if (err) {
-                      console.log(err);
-                    } else {
-                      console.log('Trying to authenticate');
-                      // passport.authenticate('local')(req, res, function () {
-                      //   res.redirect('/secrets');
-                      // });
-                      passport.authenticate('local', {
-                        failureRedirect: '/login',
-                        failureMessage: true,
-                      }),
-                        function (req, res) {
-                          res.redirect('/secrets');
-                        };
-                    }
+
+                  console.log('Trying to authenticate');
+                  passport.authenticate('local')(req, res, function () {
+                    res.redirect('/secrets');
                   });
+                  // passport.authenticate('local', {
+                  //   failureRedirect: '/login',
+                  //   failureMessage: true,
+                  // }),
+                  //   function (req, res) {
+                  //     res.redirect('/secrets');
+                  //   };
                 } else {
                   res.json({
                     status: 'FAILED',
