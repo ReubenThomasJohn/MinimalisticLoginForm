@@ -27,9 +27,8 @@ const bcrypt = require('bcrypt');
 const path = require('path');
 
 const passport = require('passport');
-const passportLocalMongoose = require('passport-local-mongoose');
+const LocalStrategy = require('passport-local');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const findOrCreate = require('mongoose-findorcreate');
 
 // mongoose.connect('mongodb://localhost:27017/userDB', { useNewUrlParser: true });
 
@@ -38,14 +37,11 @@ const findOrCreate = require('mongoose-findorcreate');
 //   password: String,
 // });
 
-userSchema.plugin(passportLocalMongoose);
 // userSchema.plugin(findOrCreate);
 
 // const secret = process.env.SECRET;
 
 const User = new mongoose.model('User', userSchema);
-
-passport.use(User.createStrategy());
 
 passport.serializeUser(function (user, done) {
   done(null, user);
@@ -54,6 +50,35 @@ passport.serializeUser(function (user, done) {
 passport.deserializeUser(function (user, done) {
   done(null, user);
 });
+
+passport.use(
+  new LocalStrategy(
+    {
+      usernameField: 'username',
+      passwordField: 'password',
+    },
+    (email, password, cb) => {
+      User.findOne({ email: email }, (err, user) => {
+        if (err) {
+          return cb(err);
+        }
+        if (!user) {
+          return cb(null, false, { message: 'Incorrect email.' });
+        }
+        bcrypt.compare(password, user.password, (err, result) => {
+          console.log(user.password);
+          if (err) {
+            return cb(err);
+          }
+          if (!result) {
+            return cb(null, false, { message: 'Incorrect password.' });
+          }
+          return cb(null, user);
+        });
+      });
+    }
+  )
+);
 
 passport.use(
   new GoogleStrategy(
@@ -341,90 +366,16 @@ router.get('/verified', (req, res) => {
 });
 
 // signin
-router.post('/login', (req, res) => {
-  let { username, password } = req.body;
-  email = username.trim();
-  password = password.trim();
-
-  if (email == '' || password == '') {
-    res.json({
-      status: 'FAILED',
-      message: 'Empty credentials supplied',
-    });
-  } else {
-    // Check if user exists
-    User.find({ email })
-      .then((data) => {
-        console.log(data);
-        if (data.length) {
-          // user exists
-
-          // check if user is verified
-
-          if (!data[0].verified) {
-            res.json({
-              status: 'FAILED',
-              message: "Email hasn't been verified yet. Check your inbox",
-            });
-          } else {
-            const hashedPassword = data[0].password;
-            bcrypt
-              .compare(password, hashedPassword)
-              .then((result) => {
-                if (result) {
-                  console.log('Password matches!');
-                  //password match
-                  // res.json({
-                  //   status: 'SUCCESS',
-                  //   message: 'Signin successfull',
-                  //   data: data,
-                  // });
-
-                  console.log('Trying to authenticate');
-                  passport.authenticate('local')(req, res, function () {
-                    res.redirect('/secrets');
-                  });
-                  // passport.authenticate('local', {
-                  //   failureRedirect: '/login',
-                  //   failureMessage: true,
-                  // }),
-                  //   function (req, res) {
-                  //     res.redirect('/secrets');
-                  //   };
-                } else {
-                  res.json({
-                    status: 'FAILED',
-                    message: 'Invalid password entered!',
-                    data: data,
-                  });
-                }
-              })
-              .catch((err) => {
-                res.json({
-                  status: 'FAILED',
-                  message: 'An error occurred while comparing passwords',
-                  data: data,
-                  error: err,
-                });
-              });
-          }
-        } else {
-          res.json({
-            status: 'FAILED',
-            message: 'Invalid credentials entered.',
-            data: data,
-          });
-        }
-      })
-      .catch((err) => {
-        res.json({
-          status: 'FAILED',
-          message: 'An error occurred while checking for existing user',
-          data: data,
-        });
-      });
+router.post(
+  '/login',
+  passport.authenticate('local', {
+    // failureRedirect: '/login',
+    failureMessage: true,
+  }),
+  function (req, res) {
+    res.redirect('/secrets');
   }
-});
+);
 
 // signup
 router.post('/register', (req, res) => {

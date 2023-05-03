@@ -9,7 +9,7 @@ TODO:
 - [x] Add bcrypt encryption
 - [x] Add cookies and sessions to autheticate users using passport.js
 - [ ] Add the toast when email ID is already in the system: https://getbootstrap.com/docs/4.3/components/toasts/
-- [ ] Upon pressing register button, email needs to be sent with a 'confirm email' prompt: Done to validate mail ID input.
+- [x] Upon pressing register button, email needs to be sent with a 'confirm email' prompt: Done to validate mail ID input.
 - [x] Add Google OAuth2
 - [ ] Try adding style like: https://www.frontendmentor.io/challenges/multistep-form-YVAnSdqQBJ
 
